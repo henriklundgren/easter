@@ -36,6 +36,13 @@ var test_goodFridays = map[int]string{
   2014: "0418",
 }
 
+var test_corpusChristi = map[int]string{
+  2013: "0530",
+  2014: "0619",
+  2015: "0604",
+  2016: "0526",
+}
+
 func Test_Set_0(t *testing.T) {
   if _, err := Set(2014, "", ""); err != nil {
     t.Error("Should return time ", err)
@@ -86,5 +93,17 @@ func Test_GoodFriday_1(t *testing.T) {
   date, _ := Set(2014, "", "")
   if goodfriday := date.GoodFriday(); goodfriday == randomDate {
     t.Error("Error")
+  }
+}
+
+func Test_CorpusChristi_0(t *testing.T) {
+  for year, corpus := range test_corpusChristi {
+    knownDatesString := fmt.Sprintf("%d%s", year, corpus)
+    knownDatesParsed, _ := time.Parse(test_layout, knownDatesString)
+
+    date, _ := Set(year, "", "")
+    if current := date.CorpusChristi(); current != knownDatesParsed {
+      t.Error("Error")
+    }
   }
 }

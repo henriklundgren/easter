@@ -85,6 +85,10 @@ func (d Easter) Invocabit() time.Time {
   return d.Date.AddDate(0, 0, -42)
 }
 
+func (d Easter) ShroveMonday() time.Time {
+  return d.Date.AddDate(0, 0, -41)
+}
+
 // 2nd Sunday of Lent
 func (d Easter) Reminiscere() time.Time {
   return d.Date.AddDate(0, 0, -35)
@@ -126,4 +130,12 @@ func (d Easter) HolyThursday() time.Time {
 
 func (d Easter) Pentecost() time.Time {
   return d.Date.AddDate(0, 0, 49)
+}
+
+func (d Easter) WhitMonday() time.Time {
+  return d.Date.AddDate(0, 0, 50)
+}
+
+func (d Easter) CorpusChristi() time.Time {
+  return d.Date.AddDate(0, 0, 60)
 }
