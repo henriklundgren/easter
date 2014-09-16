@@ -50,12 +50,26 @@ func Test_Set_0(t *testing.T) {
 }
 
 func Test_Set_1(t *testing.T) {
+  // Short test
+  if testing.Short() {
+    t.Skip("Skip second Set test in short mode.")
+  }
+
   if _, err := Set(2014, "en_US", "Europe/Berlin"); err != nil {
     t.Error("Should return time ", err)
   }
 }
 
 func Test_Day_0(t *testing.T) {
+
+  // Short test
+  if testing.Short() {
+    pt, _ := time.Parse(test_layout, "20140420")
+    et, _ := Set(2014, "", "")
+    if pt != et.Day() {
+      t.Error("error")
+    }
+  }
 
   // Loop known dates
   for year, easterDate := range test_easterDates {
@@ -76,6 +90,16 @@ func Test_Day_0(t *testing.T) {
 
 // Check if my function matches known goodfriday dates.
 func Test_GoodFriday_0(t *testing.T) {
+
+  // Short test
+  if testing.Short() {
+    pt, _ := time.Parse(test_layout, "20140418")
+    et, _ := Set(2014, "", "")
+    if pt != et.GoodFriday() {
+      t.Error("error")
+    }
+  }
+
   for year, fridays := range test_goodFridays {
     knownDatesString := fmt.Sprintf("%d%s", year, fridays)
     knownDatesParsed, _ := time.Parse(test_layout, knownDatesString)
@@ -89,6 +113,12 @@ func Test_GoodFriday_0(t *testing.T) {
 
 // Check that my function doesnt match random dates.
 func Test_GoodFriday_1(t *testing.T) {
+
+  // Short
+  if testing.Short() {
+    t.Skip("Skip second Goodfriday test in short mode.")
+  }
+
   randomDate, _ := time.Parse(test_layout, "20141224")
   date, _ := Set(2014, "", "")
   if goodfriday := date.GoodFriday(); goodfriday == randomDate {
