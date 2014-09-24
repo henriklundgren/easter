@@ -1,4 +1,5 @@
 /*
+
 Package Easter calculates and returns the Easterday date.
 
 Introduction
@@ -10,12 +11,23 @@ the first Sunday after the full moon (the Paschal Full Moon) following the March
 
 Credit
 
-The paschal algorithm utilized in the code is based solely on the work of Ronald Mallen.
+The Paschal algorithm utilized in the code is based solely on the work of Ronald Mallen.
 
 Usage
 
-easter, _ := easter.Set(year int, locale string, location string) // Easter
-easter.Day() // time.Time
+var year int = 2014
+var location *time.Location = time.Local
+
+easter, err := easter.Set(year, location)
+if err != nil {
+  panic(err)
+}
+
+// Return the easterday as type time.Time
+easterday := easter.Day()
+
+// Return a collection of the specified feastdays.
+easterCollection := easter.Get(easter.Day)
 
 */
 

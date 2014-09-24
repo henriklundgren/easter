@@ -4,138 +4,101 @@ import (
   "fmt"
   "time"
   "errors"
-  "github.com/goodsign/monday"
 )
 
 const (
   error_int string = "The given year fall below the established international calendar."
-  error_national string = "Given year not applicable on region."
   layout string = "2006-1-2"
 )
 
-type Easter struct {
-  Date time.Time
+// Exported const
+const (
+  Septuagesima  = -64
+  Sexagesima    = -56
+  Quinquagesima = -50
+  ShroveTuesday = -47
+  AshWednesday  = -46
+  Invocabit     = -42
+  ShroveMonday  = -41
+  Reminiscere   = -35
+  Oculi	        = -28
+  Laetare       = -21
+  Judica        = -16
+  PalmSunday    = -9
+  GoodFriday    = -2
+  Day           = 0
+  Monday        = +1
+  HolyThursday  = +39
+  Pentecost     = +49
+  WhitMonday    = +50
+  CorpusChristi = +60
+)
+
+var nameMap = map[int]string{
+  -64: "Septuagesima",
+  -56: "Sexagesima",
+  -50: "Quinquagesima",
+  -47: "ShroveTuesday",
+  -46: "AshWednesday",
+  -42: "Invocabit",
+  -41: "ShroveMonday",
+  -35: "Reminiscere",
+  -28: "Oculi",
+  -21: "Laetare",
+  -16: "Judica",
+   -9: "PalmSunday",
+   -2: "GoodFriday",
+    0: "Day",
+   +1: "Monday",
+  +39: "HolyThursday",
+  +49: "Pentecost",
+  +50: "WhitMonday",
+  +60: "CorpusChristi",
 }
 
+type Easter struct {
+  Date time.Time
+  Name string
+}
+
+type EasterCollection []Easter
+
 // Set/Initialize
-// Use convinience methods below to return Easter dates in time.Time format.
-func Set(year int, locale string, location string) (Easter, error) {
-  // International exception[@see doc ref:1]
+func Set(year int, location *time.Location) (Easter, error) {
   if year < 1753 {
-    return Easter{time.Now()}, errors.New(error_int)
-  }
-  // National exceptions
-  if locale == "sv_SE" && year < 1844 {
-    return Easter{time.Now()}, errors.New(error_national)
+    return Easter{time.Now(), ""}, errors.New(error_int)
   }
 
   // Calculate Paschal
   easterday := paschalAlgorithm(year)
 
-  // Make timestring
+  // Make time string
   timeString := fmt.Sprintf("%[1]d-%[2]d-%[3]d",
     easterday["year"],
     easterday["month"],
     easterday["day"],
   )
 
-  // Return time object
-  myEaster := Easter{}
-  if loc, locErr := time.LoadLocation(location); locErr == nil {
-    lang, _ := getLocale(locale)
-    parsed, _ := monday.ParseInLocation(layout, timeString, loc, lang)
-    myEaster = Easter{parsed}
-  } else {
-    parsed, _ := time.Parse(layout, timeString)
-    myEaster = Easter{parsed}
-  }
+  parsed, _ := time.ParseInLocation(layout, timeString, location)
+  return Easter{parsed, "Easterday"}, nil
+}
 
-  return myEaster, nil
+func List() (arr []string) {
+  for _, name := range nameMap {
+    arr = append(arr, name)
+  }
+  return
 }
 
 func (d Easter) Day() time.Time {
   return d.Date
 }
 
-func (d Easter) Septuagesima() time.Time {
-  return d.Date.AddDate(0, 0, -64)
+func (d Easter) Get(arg ...int) (arr EasterCollection) {
+  for _, value := range arg {
+    key := nameMap[value]
+    arr = append(arr, Easter{d.Date.AddDate(0,0, value), key})
+  }
+  return
 }
 
-func (d Easter) Sexagesima() time.Time {
-  return d.Date.AddDate(0, 0, -56)
-}
-
-// Fastlagssöndag
-func (d Easter) Quinquagesima() time.Time {
-  return d.Date.AddDate(0, 0, -50)
-}
-
-// Fettisdagen
-func (d Easter) ShroveTuesday() time.Time {
-  return d.Date.AddDate(0, 0, -47)
-}
-
-func (d Easter) AshWednesday() time.Time {
-  return d.Date.AddDate(0, 0, -46)
-}
-
-// 1st Sunday of Lent
-// Maybe only Lutherans that name the Sundays?
-func (d Easter) Invocabit() time.Time {
-  return d.Date.AddDate(0, 0, -42)
-}
-
-func (d Easter) ShroveMonday() time.Time {
-  return d.Date.AddDate(0, 0, -41)
-}
-
-// 2nd Sunday of Lent
-func (d Easter) Reminiscere() time.Time {
-  return d.Date.AddDate(0, 0, -35)
-}
-
-// 3rd Sunday of Lent
-func (d Easter) Oculi() time.Time {
-  return d.Date.AddDate(0, 0, -28)
-}
-
-// 4th Sunday of Lent
-// Midfastosöndagen
-func (d Easter) Laetare() time.Time {
-  return d.Date.AddDate(0, 0, -21)
-}
-
-// 5th Sunday of Lent
-func (d Easter) Judica() time.Time {
-  return d.Date.AddDate(0, 0, -16)
-}
-
-// 6th Sunday of Lent
-func (d Easter) PalmSunday() time.Time {
-  return d.Date.AddDate(0, 0, -9)
-}
-
-// Långfredag
-func (d Easter) GoodFriday() time.Time {
-  return d.Date.AddDate(0, 0, -2)
-}
-
-func (d Easter) Monday() time.Time {
-  return d.Date.AddDate(0, 0, 1)
-}
-
-func (d Easter) HolyThursday() time.Time {
-  return d.Date.AddDate(0, 0, 39)
-}
-
-func (d Easter) Pentecost() time.Time {
-  return d.Date.AddDate(0, 0, 49)
-}
-
-func (d Easter) WhitMonday() time.Time {
-  return d.Date.AddDate(0, 0, 50)
-}
-
-func (d Easter) CorpusChristi() time.Time {
-  return d.Date.AddDate(0, 0, 60)
-}

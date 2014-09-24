@@ -30,21 +30,8 @@ var test_easterDates = map[int]string{
   2014: "0420",
 }
 
-var test_goodFridays = map[int]string{
-  2012: "0406",
-  2013: "0329",
-  2014: "0418",
-}
-
-var test_corpusChristi = map[int]string{
-  2013: "0530",
-  2014: "0619",
-  2015: "0604",
-  2016: "0526",
-}
-
 func Test_Set_0(t *testing.T) {
-  if _, err := Set(2014, "", ""); err != nil {
+  if _, err := Set(2014, time.Local); err != nil {
     t.Error("Should return time ", err)
   }
 }
@@ -55,7 +42,7 @@ func Test_Set_1(t *testing.T) {
     t.Skip("Skip second Set test in short mode.")
   }
 
-  if _, err := Set(2014, "en_US", "Europe/Berlin"); err != nil {
+  if _, err := Set(2014, time.Local); err != nil {
     t.Error("Should return time ", err)
   }
 }
@@ -65,8 +52,8 @@ func Test_Day_0(t *testing.T) {
   // Short test
   if testing.Short() {
     pt, _ := time.Parse(test_layout, "20140420")
-    et, _ := Set(2014, "", "")
-    if pt != et.Day() {
+    et, _ := Set(2014, time.UTC)
+    if try := et.Day(); pt != try {
       t.Error("error")
     }
   }
@@ -81,59 +68,33 @@ func Test_Day_0(t *testing.T) {
     }
 
     // Ask for easter date on year year
-    date, _ := Set(year, "", "")
+    date, _ := Set(year, time.UTC)
     if checkDate := date.Day(); checkDate != parsed {
       t.Error("Error")
     }
   }
 }
 
-// Check if my function matches known goodfriday dates.
-func Test_GoodFriday_0(t *testing.T) {
-
-  // Short test
-  if testing.Short() {
-    pt, _ := time.Parse(test_layout, "20140418")
-    et, _ := Set(2014, "", "")
-    if pt != et.GoodFriday() {
-      t.Error("error")
-    }
+func Test_Const_0(t *testing.T) {
+  localSexagesima := time.Date(2014, 02, 23, 0, 0, 0, 0, time.Local)
+  easterDate, _ := Set(2014, time.Local)
+  if single := easterDate.Day(); single.AddDate(0,0, Sexagesima) != localSexagesima {
+    t.Error("Error")
   }
 
-  for year, fridays := range test_goodFridays {
-    knownDatesString := fmt.Sprintf("%d%s", year, fridays)
-    knownDatesParsed, _ := time.Parse(test_layout, knownDatesString)
-
-    date, _ := Set(year, "", "")
-    if goodfriday := date.GoodFriday(); goodfriday != knownDatesParsed {
-      t.Error("Error")
-    }
-  }
 }
 
-// Check that my function doesnt match random dates.
-func Test_GoodFriday_1(t *testing.T) {
-
-  // Short
-  if testing.Short() {
-    t.Skip("Skip second Goodfriday test in short mode.")
-  }
-
-  randomDate, _ := time.Parse(test_layout, "20141224")
-  date, _ := Set(2014, "", "")
-  if goodfriday := date.GoodFriday(); goodfriday == randomDate {
+func Test_Day_1(t *testing.T) {
+  testing, _ := Set(2014, time.Local)
+  if arr := testing.Get(Sexagesima, Monday, GoodFriday); arr == nil {
     t.Error("Error")
   }
 }
 
-func Test_CorpusChristi_0(t *testing.T) {
-  for year, corpus := range test_corpusChristi {
-    knownDatesString := fmt.Sprintf("%d%s", year, corpus)
-    knownDatesParsed, _ := time.Parse(test_layout, knownDatesString)
-
-    date, _ := Set(year, "", "")
-    if current := date.CorpusChristi(); current != knownDatesParsed {
-      t.Error("Error")
-    }
+func Test_List_0(t *testing.T) {
+  testing := List()
+  if testing == nil {
+    t.Error("error")
   }
 }
+
